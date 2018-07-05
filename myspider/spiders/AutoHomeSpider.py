@@ -37,5 +37,12 @@ class DmozSpider(scrapy.Spider):
             auto_item["small_img_url"] = img.xpath(".//img/@data-original").extract()[0]
             big_img_url = "https:" + img.xpath("@href").extract()[0]
             auto_item["big_img_url"] = big_img_url
-            auto_item['image_urls'] = auto_item["small_img_url"]
-            yield auto_item
+            # auto_item['image_urls'] = img.xpath(".//img/@data-original").extract()
+            yield scrapy.Request(big_img_url, callback=self.parse_big_img_item, meta={"item": auto_item})
+
+    def parse_big_img_item(self, response):
+        item = response.request.meta['item']
+        img_url = response.xpath("//div[@class=\"pic\"]/img/@src").extract()
+        if img_url:
+            item['image_urls'] = ["https:" + url for url in img_url]
+            yield item

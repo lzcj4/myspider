@@ -3,6 +3,7 @@ from scrapy.pipelines.images import ImagesPipeline
 from scrapy.exceptions import DropItem
 import re
 
+
 class AutoImagePipeline(ImagesPipeline):
 
     def file_path(self, request, response=None, info=None):
@@ -28,8 +29,7 @@ class AutoImagePipeline(ImagesPipeline):
         """
         for img_url in item['image_urls']:
             referer = item['ref_url']
-            yield Request(img_url, meta={'item': item,
-                                         'referer': referer})
+            yield Request(img_url, meta={'item': item,'referer': referer})
 
     def item_completed(self, results, item, info):
         image_paths = [x['path'] for ok, x in results if ok]
