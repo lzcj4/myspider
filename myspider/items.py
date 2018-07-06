@@ -10,8 +10,11 @@ import scrapy
 
 class AutoFeatureItem(scrapy.Item):
     '''车型信息'''
+    brand_name = scrapy.Field()
+    category_name = scrapy.Field()
     car_name = scrapy.Field()
-    feature = scrapy.Field()
+    features = scrapy.Field()
+    price = scrapy.Field()
     small_img_url = scrapy.Field()
     big_img_url = scrapy.Field()
 

@@ -15,10 +15,9 @@ class AutoImagePipeline(ImagesPipeline):
         :return: 每套图的分类目录
         """
         item = request.meta['item']
-        folder = item['car_name']
-        folder_strip = strip(folder)
-        image_guid = request.url.split('/')[-1]
-        filename = u'{0}/{1}.jpg'.format(folder_strip, item['feature'])
+        folder = "/".join([strip(item['brand_name']), strip(item['category_name']),
+                           strip(item['car_name'] + "_" + item['price'])])
+        filename = "{0}/{1}.jpg".format(folder, item['features'][item["image_urls"].index(request.url)])
         return filename
 
     def get_media_requests(self, item, info):
@@ -29,7 +28,7 @@ class AutoImagePipeline(ImagesPipeline):
         """
         for img_url in item['image_urls']:
             referer = item['ref_url']
-            yield Request(img_url, meta={'item': item,'referer': referer})
+            yield Request(img_url, meta={'item': item, 'referer': referer})
 
     def item_completed(self, results, item, info):
         image_paths = [x['path'] for ok, x in results if ok]
