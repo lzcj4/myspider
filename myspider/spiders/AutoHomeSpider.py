@@ -26,7 +26,7 @@ class AutoHomeSpider(scrapy.Spider):
         for c in string.ascii_uppercase:
             if c:
                 yield scrapy.Request("https://www.autohome.com.cn/grade/carhtml/{0}.html".format(c),
-                                     callback=self.parse_car_brands, meta={"char_index": "G"})
+                                     callback=self.parse_car_brands, meta={"char_index": c})
 
     def parse_car_brands(self, response):
         char_index = response.request.meta["char_index"]
