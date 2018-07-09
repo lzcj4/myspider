@@ -49,7 +49,8 @@ class AutoHomeSpider(scrapy.Spider):
                     if not car_info:
                         continue
                     auto_item["car_name"] = car_info[0]
-                    auto_item["price"] = car_info[1]
+                    auto_item["price"] = "(指导价：{0})".format(car_info[1]) \
+                        if car_info[1] not in ("图库", "报价") else "(指导价：暂无)"
                     auto_item["features"] = []
                     car_url = "https:" + a.xpath(".//a[1]/@href").extract()[0]
                     print("{}、{}_{}_{}".format(i, brand_name, category_name, car_info[0], car_info[1]))
@@ -60,9 +61,15 @@ class AutoHomeSpider(scrapy.Spider):
         auto_item = response.request.meta["item"]
         print("{}、{}_{}_{}".format(auto_item["brand_name"], auto_item["category_name"],
                                    auto_item["car_name"], response.request.url))
+        i = 1
         if img_list:
             for img in img_list:
-                auto_item["features"].append(img.xpath(".//img/@alt").extract()[0])
+                f = img.xpath(".//img/@alt").extract()[0]
+                if f in auto_item["features"]:
+                    auto_item["features"].append("{0}_{1}".format(f, i))
+                    i += 1
+                else:
+                    auto_item["features"].append(f)
                 auto_item["ref_url"] = response.request.url
                 auto_item['image_urls'] = []
                 auto_item["small_img_url"] = img.xpath(".//img/@data-original").extract()[0]
@@ -73,7 +80,12 @@ class AutoHomeSpider(scrapy.Spider):
             img_list = response.xpath("//ul[@class=\"piclist\"]/li")
             if img_list:
                 for img in img_list:
-                    auto_item["features"].append(img.xpath(".//p/a/text()").extract()[0])
+                    f = img.xpath(".//p/a/text()").extract()[0]
+                    if f in auto_item["features"]:
+                        auto_item["features"].append("{0}_{1}".format(f, i))
+                        i += 1
+                    else:
+                        auto_item["features"].append(f)
                     auto_item["ref_url"] = response.request.url
                     auto_item['image_urls'] = []
                     auto_item["small_img_url"] = img.xpath(".//img/@src").extract()[0]
@@ -86,7 +98,9 @@ class AutoHomeSpider(scrapy.Spider):
                     for img in img_list:
                         auto_item["ref_url"] = response.request.url
                         auto_item['image_urls'] = img.xpath(".//img/@src").extract()
-                        auto_item["features"] = ["全图"] * len(auto_item['image_urls'])
+                        for i in range(len(auto_item['image_urls'])):
+                            auto_item["features"].append("{0}_{1}".format("全图", i))
+
                         auto_item["small_img_url"] = img.xpath(".//img/@src").extract()[0]
                         yield auto_item
                 else:
