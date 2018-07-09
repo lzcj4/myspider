@@ -20,21 +20,16 @@ class AutoHomeSpider(scrapy.Spider):
         self.domain = "https://www.autohome.com.cn"
 
     def parse(self, response):
-        yield scrapy.Request("https://www.autohome.com.cn/grade/carhtml/{0}.html".format("G"),
-                             callback=self.parse_car_brands)
+        # yield scrapy.Request("https://www.autohome.com.cn/grade/carhtml/{0}.html".format("G"),
+        #                      callback=self.parse_car_brands, meta={"char_index": "G"})
 
-        # for c in string.ascii_uppercase:
-        #     if c:
-        #         yield scrapy.Request("https://www.autohome.com.cn/grade/carhtml/{0}.html".format(c),
-        #                              callback=self.parse_car_brands)
-
-        # car_list = response.xpath("//div[@class=\"box\"]/p[1]/a")
-        # for car in car_list:
-        #     car_url = self.domain + car.xpath("@href").extract()[0]
-        #     if car_url is not None:
-        #         yield scrapy.Request(car_url, callback=self.parse_item)
+        for c in string.ascii_uppercase:
+            if c:
+                yield scrapy.Request("https://www.autohome.com.cn/grade/carhtml/{0}.html".format(c),
+                                     callback=self.parse_car_brands, meta={"char_index": "G"})
 
     def parse_car_brands(self, response):
+        char_index = response.request.meta["char_index"]
         brands = response.xpath("//dl")
         for b in brands:
             brand_name = b.xpath(".//dt/div/a/text()").extract()[0]
@@ -47,6 +42,7 @@ class AutoHomeSpider(scrapy.Spider):
                 for a in autos:
                     i += 1
                     auto_item = AutoFeatureItem()
+                    auto_item["char_index"] = char_index
                     auto_item["brand_name"] = brand_name
                     auto_item["category_name"] = category_name
                     car_info = a.xpath(".//a/text()").extract()
@@ -72,9 +68,6 @@ class AutoHomeSpider(scrapy.Spider):
                 auto_item["small_img_url"] = img.xpath(".//img/@data-original").extract()[0]
                 big_img_url = "https:" + img.xpath("@href").extract()[0]
                 auto_item["big_img_url"] = big_img_url
-
-                print("{}、{}_{}_{}".format(auto_item["brand_name"], auto_item["category_name"], auto_item["car_name"],
-                                           img.xpath(".//img/@alt").extract()[0]))
                 yield scrapy.Request(big_img_url, callback=self.parse_big_img_item, meta={"item": auto_item})
         else:
             img_list = response.xpath("//ul[@class=\"piclist\"]/li")
@@ -86,9 +79,6 @@ class AutoHomeSpider(scrapy.Spider):
                     auto_item["small_img_url"] = img.xpath(".//img/@src").extract()[0]
                     big_img_url = "https:" + img.xpath(".//a/@href").extract()[0]
                     auto_item["big_img_url"] = big_img_url
-                    print(
-                        "{}、{}_{}_{}".format(auto_item["brand_name"], auto_item["category_name"], auto_item["car_name"],
-                                             img.xpath(".//p/a/text()").extract()[0]))
                     yield scrapy.Request(big_img_url, callback=self.parse_big_img_item, meta={"item": auto_item})
             else:
                 img_list = response.xpath("//dl[@class=\"models_pics\"]")
@@ -98,8 +88,6 @@ class AutoHomeSpider(scrapy.Spider):
                         auto_item['image_urls'] = img.xpath(".//img/@src").extract()
                         auto_item["features"] = ["全图"] * len(auto_item['image_urls'])
                         auto_item["small_img_url"] = img.xpath(".//img/@src").extract()[0]
-                        print("{}、{}_{}".format(auto_item["brand_name"], auto_item["category_name"],
-                                                auto_item["car_name"]))
                         yield auto_item
                 else:
                     pass

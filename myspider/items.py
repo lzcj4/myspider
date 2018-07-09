@@ -10,6 +10,7 @@ import scrapy
 
 class AutoFeatureItem(scrapy.Item):
     '''车型信息'''
+    char_index = scrapy.Field()
     brand_name = scrapy.Field()
     category_name = scrapy.Field()
     car_name = scrapy.Field()

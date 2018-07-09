@@ -15,9 +15,12 @@ class AutoImagePipeline(ImagesPipeline):
         :return: 每套图的分类目录
         """
         item = request.meta['item']
-        folder = "/".join([strip(item['brand_name']), strip(item['category_name']),
+        folder = "/".join([strip(item['char_index']),strip(item['brand_name']), strip(item['category_name']),
                            strip(item['car_name'] + "_" + item['price'])])
-        filename = "{0}/{1}.jpg".format(folder, item['features'][item["image_urls"].index(request.url)])
+        feature="无"
+        if request.url in item["image_urls"]:
+            feature=item['features'][item["image_urls"].index(request.url)]
+        filename = "{0}/{1}.jpg".format(folder, feature)
         return filename
 
     def get_media_requests(self, item, info):
