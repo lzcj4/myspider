@@ -75,8 +75,6 @@ class KugouSearchSpider(KugouSpider):
         super().__init__()
         self.keyword = keyword
 
-    def run(self):
-        self.get_songs(self.get_urls())
 
     def get_urls(self):
         self.browser.get(KugouSearchSpider.WEB_URL + self.keyword)
@@ -90,35 +88,6 @@ class KugouSearchSpider(KugouSpider):
             token = song_a.get_attribute("data").split("|")[0]
             song_urls.append("http://www.kugou.com/song/#hash={0}".format(token))
         return song_urls
-
-    def get_songs(self, song_urls):
-        for url in song_urls:
-            print("request url:{0}".format(url))
-            # browser.implicitly_wait(10)
-            # browser.set_page_load_timeout(10)
-            self.browser.get(url)
-            time.sleep(2)
-            self.browser.refresh()
-            time.sleep(3)
-            try:
-                # song_name = wait.until(EC.text_to_be_present_in_element((By.CLASS_NAME, "change-time"), "00:01"))
-                song = self.browser.find_element_by_id("songName")
-                player = self.browser.find_element_by_id("myAudio")
-                song_url = player.get_attribute("src")
-                if song and song.text == "酷狗音乐":
-                    continue
-                if song_url:
-                    print(song.text, song_url)
-                    req = requests.get(song_url)
-                    song_path = self.save_path / (song.text + ".mp3")
-                    with song_path.open(mode="wb") as f:
-                        f.write(req.content)
-                        print("---> Save song : {0}".format(song_path))
-            except(TimeoutException, NoSuchElementException, StaleElementReferenceException) as e:
-                print(e.msg)
-
-        self.browser.quit()
-
 
 if __name__ == "__main__":
     # spider = KugouSpider()
