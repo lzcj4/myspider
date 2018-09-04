@@ -10,8 +10,9 @@ import time
 
 
 class KugouSpider:
-    WEB_URL = "http://www.kugou.com/"
+    KUGOU_WEB_URL = "http://www.kugou.com/"
     # WEB_URL = "http://www.kugou.com/yy/special/single/378394.html"
+    USER_WEB_URL = "http://www.kugou.com/yy/special/single/377300.html"
     SAVE_PATH = "E:/KG/Music/"
 
     def __init__(self):
@@ -19,7 +20,7 @@ class KugouSpider:
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--window-size=1920,1080")
         self.browser = webdriver.Chrome(chrome_options=chrome_options)
-
+        self.is_get_by_kugou = False
         self.save_path = Path(KugouSpider.SAVE_PATH)
         if not self.save_path.exists():
             self.save_path.mkdir(parents=True)
@@ -27,15 +28,34 @@ class KugouSpider:
     def run(self):
         self.get_songs(self.get_urls())
 
-    def get_urls(self):
-        self.browser.get(KugouSpider.WEB_URL)
+    def get_urls_from_user(self):
+        '''
+        用户归类
+        :return:
+        '''
+
+        self.browser.get(KugouSpider.USER_WEB_URL)
+        wait = WebDriverWait(self.browser, 10)
+        li_items = self.browser.find_elements_by_xpath("//li/a[@href=\"javascript:;\"]")
+        song_urls = ["http://www.kugou.com/song/#hash={0}".format(li.get_attribute("data").split('|')[0])
+                     for li in li_items]
+        return song_urls
+
+    def get_urls_from_kugou(self):
+        '''
+         酷狗首页最新
+         :return:
+        '''
+        self.browser.get(KugouSpider.KUGOU_WEB_URL)
         li_items = self.browser.find_elements_by_xpath("//li[@data]/a")
         song_urls = [li.get_attribute("href") for li in li_items]
-        wait = WebDriverWait(self.browser, 10)
-        # li_items = browser.find_elements_by_xpath("//li/a[@href=\"javascript:;\"]")
-        # song_urls = ["http://www.kugou.com/song/#hash={0}".format(li.get_attribute("data").split('|')[0])
-        #              for li in li_items]
         return song_urls
+
+    def get_urls(self):
+        if self.is_get_by_kugou:
+            return self.get_urls_from_kugou()
+        else:
+            return  self.get_urls_from_user()
 
     def get_songs(self, song_urls):
         for url in song_urls:
@@ -75,7 +95,6 @@ class KugouSearchSpider(KugouSpider):
         super().__init__()
         self.keyword = keyword
 
-
     def get_urls(self):
         self.browser.get(KugouSearchSpider.WEB_URL + self.keyword)
         # li_items = self.browser.find_elements_by_xpath("//li[@class=\"clearfix\"]/a")
@@ -89,7 +108,8 @@ class KugouSearchSpider(KugouSpider):
             song_urls.append("http://www.kugou.com/song/#hash={0}".format(token))
         return song_urls
 
+
 if __name__ == "__main__":
-    # spider = KugouSpider()
-    spider = KugouSearchSpider("冯提莫")
+    spider = KugouSpider()
+    # spider = KugouSearchSpider("冯提莫")
     spider.run()
