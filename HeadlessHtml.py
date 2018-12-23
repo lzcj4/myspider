@@ -11,16 +11,15 @@ import time
 
 class KugouSpider:
     KUGOU_WEB_URL = "http://www.kugou.com/"
-    # WEB_URL = "http://www.kugou.com/yy/special/single/378394.html"
-    USER_WEB_URL = "http://www.kugou.com/yy/special/single/377300.html"
+    USER_WEB_URL = "https://www.kugou.com/yy/special/single/555440.html"
     SAVE_PATH = "E:/KG/Music/"
+    IS_GET_BY_KUGOU = False
 
     def __init__(self):
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--window-size=1920,1080")
         self.browser = webdriver.Chrome(chrome_options=chrome_options)
-        self.is_get_by_kugou = False
         self.save_path = Path(KugouSpider.SAVE_PATH)
         if not self.save_path.exists():
             self.save_path.mkdir(parents=True)
@@ -52,10 +51,10 @@ class KugouSpider:
         return song_urls
 
     def get_urls(self):
-        if self.is_get_by_kugou:
+        if KugouSpider.IS_GET_BY_KUGOU:
             return self.get_urls_from_kugou()
         else:
-            return  self.get_urls_from_user()
+            return self.get_urls_from_user()
 
     def get_songs(self, song_urls):
         for url in song_urls:
@@ -111,5 +110,6 @@ class KugouSearchSpider(KugouSpider):
 
 if __name__ == "__main__":
     spider = KugouSpider()
-    # spider = KugouSearchSpider("冯提莫")
     spider.run()
+    # spider = KugouSearchSpider("谢春花")
+    # spider.run()
