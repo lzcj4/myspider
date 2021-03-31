@@ -11,7 +11,7 @@ get==1.0.3
 hyperlink==18.0.0
 idna==2.7
 incremental==17.5.0
-lxml==4.2.3
+lxml==4.6.3
 parsel==1.4.0
 pathlib==1.0.1
 Pillow==5.2.0
